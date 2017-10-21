@@ -1,0 +1,38 @@
+package gr.joints.myscreens;
+
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import gr.joints.MyGame;
+import gr.joints.managers.MyScreenManager;
+
+public abstract class GraniteScreen {
+	private SpriteBatch sb;
+	private Texture tex;
+	private MyGame game;
+	private OrthographicCamera cam, b2dcam;
+	
+	//........................... End Of Fields ..................................
+	
+	public GraniteScreen(MyScreenManager msm) {
+		this.game = msm.getGame();
+		this.sb = game.getSpriteBatch();
+		this.cam = game.getCam();
+		this.b2dcam = game.getb2dCam();
+		this.tex = game.getTex();
+	}
+	
+	//============================== Getters - Setters ==================================
+	public SpriteBatch getSb() { return sb; }
+	public Texture getTex() { return tex; }
+	public OrthographicCamera getCam() { return cam; }
+	public OrthographicCamera getb2dCam() { return b2dcam; }
+	
+	//................................... Abstract Methods ........................
+	public abstract void update(float dt);
+	public abstract void render();
+	public abstract void dispose();
+	
+	
+}//END

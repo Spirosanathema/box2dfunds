@@ -1,0 +1,416 @@
+package gr.box2dscale;
+
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
+import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.physics.box2d.joints.RopeJoint;
+import com.badlogic.gdx.physics.box2d.joints.RopeJointDef;
+import com.badlogic.gdx.utils.Array;
+
+public class MyGame extends ApplicationAdapter {
+	SpriteBatch batch;
+	Texture img, johnImg, rope;
+	World world;
+	Box2DDebugRenderer renderer;
+	OrthographicCamera cam;
+	Body ground, player, testy, player2;
+	Sprite sp, johnSprite, ropeSprite;
+	Array<Body> bodies;
+	
+	int ropePieces;
+		
+	float PPM = 100f;
+	float G_Width, G_Height;
+	float STEP = 1/45f;
+	float accum;
+	float player2Width, player2Height;
+	
+	boolean rightRepeat = false;
+	boolean leftRepeat = false;
+	boolean upRepeat = false;
+	boolean downRepeat = false;
+	
+	DistanceJoint djoint;
+	RevoluteJoint revjoint;
+	RopeJoint ropejoint;
+	
+	
+	@Override
+	public void create () {
+		batch = new SpriteBatch();
+		img = new Texture("badlogic.jpg");
+		johnImg = new Texture(Gdx.files.internal("giannis.png"));
+		rope = new Texture(Gdx.files.internal("ropePieceTest.png"));
+		bodies = new Array<Body>();
+		world = new World(new Vector2(0, -9.81f), false);
+		renderer = new Box2DDebugRenderer();
+		G_Width = Gdx.graphics.getWidth();
+		G_Height = Gdx.graphics.getHeight();
+		cam = new OrthographicCamera();
+		cam.setToOrtho(false, G_Width/PPM, G_Height/PPM);
+		
+		
+		
+		accum = 0;
+		sp = new Sprite(img);
+		johnSprite = new Sprite(johnImg);
+		ropeSprite = new Sprite(rope);
+		ropePieces = 40;
+		player2Width = 1f;
+		player2Height = 1f;
+		
+		ground = createPolygonBody(true, G_Width/2/PPM, G_Height /2/(PPM * 20)+.1f, G_Width/2/PPM, G_Height /2/(PPM * 20));
+		mouseJnt();
+		player = createPolygonBody(false, G_Width / 2/ PPM, G_Height / 2 / PPM, G_Width/(30 * PPM), G_Height /(PPM * 20));
+		//testy = createPolygonBody(true, G_Width/2/PPM, G_Height/2/PPM, G_Width/2/PPM, G_Height/2/PPM);
+		player2 = createCircleBody(false, (player2Width + .5f) / 2f, player2Height/2f + 2f, player2Height/2f);
+		player2.setType(BodyDef.BodyType.KinematicBody);
+		player2.getFixtureList().get(0).setRestitution(0.1f);
+		System.out.println("G_Width = " + G_Width);
+		
+		sp.setSize(G_Width/(30 * PPM), G_Height /(PPM * 20));		
+		johnSprite.setSize(player2Width/2f,  player2Height/2f);
+		ropeSprite.setSize(5f/PPM, 10f/PPM);
+		
+		//      IMPORTANT NOTE !!!!!		
+		// When we create Box2D body dimensions eg. width = 30, body's width created is 60!!!
+		// so we have to keep it in mind when we do sprite resize!!!!
+		
+		// When we create a body in Box2D and set position, position (0, 0) is in the CENTER of the shape !!!
+		
+		////////////////////////////////////  JOINTS  /////////////////////////////////////////////////////////////
+		//Distance Joint
+		DistanceJointDef djdef = new DistanceJointDef();
+		djdef.bodyA = player;
+		djdef.bodyB = player2;
+		djdef.length = 100f / PPM;
+		djdef.collideConnected = true; // If the Bodies collide or not. By default it is false so bod ies go one through another
+		djdef.frequencyHz = 1f; // Elasticity effect !!!
+		djdef.dampingRatio = 0f; // How fast the return of the joint will be (softness???)
+		//djoint = (DistanceJoint)world.createJoint(djdef);
+		
+		//Rope Joint
+		createRopeJoints();
+		
+		
+		Gdx.input.setInputProcessor(new MyKeyListener());
+		
+	}
+	
+	public void update(float dt) {
+		world.step(STEP, 6, 2);
+		inputHandler();
+		System.out.println("renderer body.get(1) angle = " + bodies.get(ropePieces - 1).getAngle());
+		cam.update();
+	}
+
+	@Override
+	public void render () {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		accum += Gdx.graphics.getDeltaTime();
+		while(accum >= STEP) {
+			accum -= STEP;
+			update(STEP);
+			
+		}
+		
+		//renderer.render(world, cam.combined);
+		
+		batch.begin();
+		batch.draw(sp, player.getPosition().x * PPM - sp.getWidth() * PPM, player.getPosition().y * PPM - sp.getHeight() * PPM, (G_Width * 2) / 30, (G_Height * 2) / 20);
+		batch.draw(johnSprite, 
+				player2.getPosition().x * PPM - johnSprite.getWidth() * PPM, //PositionX
+				player2.getPosition().y * PPM - johnSprite.getHeight() * PPM, // PositionY
+				player2Width * PPM / 2, //originX
+				player2Height * PPM / 2, //originY
+				player2Width * PPM, //width
+				player2Height * PPM, //height
+				1, //scaleX
+				1, //scaleY
+				player2.getAngle() * PPM);//rotation
+
+		//System.out.println("player2 getpositionX = " + player2.getPosition().x * PPM + "\nplayer2 height = " + player2.getPosition().y * PPM + "\nplayer2 getANGLE = " + player2.getAngle() + "\n");
+		for(int i=1; i<ropePieces; i++) {
+			batch.draw(ropeSprite,
+					bodies.get(i).getPosition().x * PPM - ropeSprite.getWidth()*PPM / 2,
+					bodies.get(i).getPosition().y * PPM - ropeSprite.getHeight() * PPM /2,
+					(ropeSprite.getWidth() * PPM) / 2,
+					(ropeSprite.getHeight() * PPM),
+					ropeSprite.getWidth() * PPM,
+					ropeSprite.getHeight() * PPM,
+					1,
+					1,
+					0
+					//bodies.get(i).getAngle()*PPM
+					//Math.toDegrees(bodies.get(i).getAngle() * PPM)
+					);
+			System.out.println("After for body.get(i-1) angle = " + bodies.get(39).getAngle() + "\n");
+//			batch.draw(ropeSprite,
+//					bodies.get(i).getPosition().x * PPM - ropeSprite.getWidth()*PPM / 2,
+//					bodies.get(i).getPosition().y * PPM - ropeSprite.getHeight() * PPM /2,
+//					ropeSprite.getWidth() * PPM,
+//					ropeSprite.getHeight() * PPM
+//					
+//					);
+			//System.out.println("ropeSprite get(1) = " + ropeSprite.getOriginY() + "\n");
+		}
+//		batch.draw(ropeSprite,
+//				bodies.get(1).getPosition().x * PPM - ropeSprite.getWidth()*PPM / 2,
+//				bodies.get(1).getPosition().y * PPM - ropeSprite.getHeight() * PPM /2,
+//				(ropeSprite.getWidth() * PPM) / 2,
+//				(ropeSprite.getHeight() * PPM),
+//				ropeSprite.getWidth() * PPM,
+//				ropeSprite.getHeight() * PPM,
+//				1,
+//				1,
+//				bodies.get(1).getTransform().getRotation()
+//				//Math.toDegrees(bodies.get(i).getAngle() * PPM)
+//				);
+		
+		batch.end();
+	}
+	
+	@Override
+	public void dispose () {
+		batch.dispose();
+		img.dispose();
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		
+		
+		System.out.println("Gdx.getWidth = " + Gdx.graphics.getWidth() + "\nGdx.getHeight = " + Gdx.graphics.getHeight() + "\n");
+		System.out.println("int width = " + width + "\nint height = " + height + "\n");
+		System.out.println("sprite's width = " + sp.getWidth() + "\nsprite's Height = " + sp.getHeight() + "\n");
+		
+	}
+	
+	public Body createPolygonBody(boolean isStatic, float positionX, float positionY, float dimensionX, float dimensionY) {
+		Body body;
+		Fixture fixture;
+		
+		BodyDef bdef = new BodyDef();
+		if(isStatic) {
+			bdef.type = BodyDef.BodyType.StaticBody;
+		}
+		else {
+			bdef.type = BodyDef.BodyType.DynamicBody;
+		}
+		bdef.position.set(new Vector2(positionX, positionY));
+		
+		FixtureDef fdef = new FixtureDef();
+		PolygonShape pshape = new PolygonShape();
+		pshape.setAsBox(dimensionX, dimensionY);
+		fdef.density = .51f;
+		fdef.shape = pshape;
+		
+		body = world.createBody(bdef);
+		fixture = body.createFixture(fdef);
+		
+		body.setUserData(sp);
+		
+		pshape.dispose();
+		return body;
+	}
+	
+	public Body createCircleBody(boolean isStatic, float positionX, float positionY, float radius) {
+		Body body;
+		Fixture fixture;
+		
+		BodyDef bdef = new BodyDef();
+		if(isStatic)
+			bdef.type = BodyDef.BodyType.StaticBody;
+		else
+			bdef.type = BodyDef.BodyType.DynamicBody;
+		bdef.position.set(positionX, positionY);
+		body = world.createBody(bdef);
+		
+		CircleShape shape = new CircleShape();
+		shape.setRadius(radius);
+		
+		FixtureDef fdef = new FixtureDef();
+		fdef.density = .51f;
+		//fdef.restitution = .2f;
+		fdef.shape = shape;
+		fixture = body.createFixture(fdef);
+		
+		body.setUserData(player2);
+		shape.dispose();
+		
+		return body;
+	}
+	
+	public void inputHandler() {
+		float horizontalMove = 0;
+		float verticalMove = 0;
+		
+		if(rightRepeat) {
+			horizontalMove += 1f;
+		}
+		if(leftRepeat) {
+			horizontalMove -= 1f;			
+		}
+		if(upRepeat) {
+			System.out.println("UP");
+			verticalMove += 1f;
+		}
+		if(downRepeat) {
+			System.out.println("DOWN");
+			verticalMove -= 1f;
+		}
+		
+//		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+//			verticalMove += 30f;
+//		}
+//		if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+//			verticalMove -= 30f;
+//		}
+		
+		player2.setLinearVelocity(new Vector2(horizontalMove * 3, player2.getLinearVelocity().y));
+		//player2.setLinearVelocity(horizontalMove * 3, MathUtils.clamp(player2.getLinearVelocity().y, -9.81f, verticalMove * 130));
+		//player2.applyForceToCenter(new Vector2(0, verticalMove * 3), true);
+		player2.setLinearVelocity(new Vector2(player2.getLinearVelocity().x, verticalMove * 3));
+	}
+	
+	public void createRopeJoints() {
+		bodies.add(createPolygonBody(true, 600/PPM, 500/PPM, 60/2/PPM, 10/2/PPM));
+		
+		for(int i=1; i<ropePieces; i++) {
+			bodies.add(createPolygonBody(false, 0, -i*(10f/2f/PPM), 5f/2f/PPM, 10f/2f/PPM));
+			
+			RopeJointDef rjdef = new RopeJointDef();
+			rjdef.bodyA = bodies.get(0);
+			rjdef.bodyB = bodies.get(i);
+			rjdef.collideConnected = true;
+			rjdef.maxLength = i * 0.1f;
+			rjdef.localAnchorA.set(0, -.05f);
+			rjdef.localAnchorB.set(0, .05f);
+			
+			ropejoint = (RopeJoint)world.createJoint(rjdef);
+			
+			RevoluteJointDef revjdef = new RevoluteJointDef();
+			revjdef.bodyA = bodies.get(i-1);
+			revjdef.bodyB = bodies.get(i);
+			revjdef.localAnchorA.set(0, -.05f);
+			revjdef.localAnchorB.set(0, .05f);
+			
+			revjoint = (RevoluteJoint)world.createJoint(revjdef);
+		}
+		ground.setActive(false);
+	}
+	
+	public void mouseJnt() {
+		MouseJointDef mjdef = new MouseJointDef();
+		mjdef.bodyA = ground;
+		mjdef.maxForce = 50000;
+		mjdef.collideConnected = true;
+		
+		//MouseJointAdapter mjadapter = new MouseJointAdapter(mjdef, true, cam);
+	}
+	
+	////////////////////////////////// INNER CLASSES /////////////////////////////////////////////////
+	public class MyKeyListener implements InputProcessor{
+		
+
+		@Override
+		public boolean keyDown(int keycode) {
+			
+			
+			if(keycode == Keys.RIGHT) {
+				rightRepeat = true;				
+			}
+			if(keycode == Keys.LEFT) {
+				leftRepeat = true;				
+			}
+			if(keycode == Keys.UP) {
+				upRepeat = true;				
+			}
+			if(keycode == Keys.DOWN) {
+				downRepeat = true;				
+			}
+			
+			return false;
+		}
+
+		@Override
+		public boolean keyUp(int keycode) {
+			if(keycode == Keys.RIGHT) {
+				rightRepeat = false;				
+			}
+			if(keycode == Keys.LEFT) {
+				leftRepeat = false;				
+			}
+			if(keycode == Keys.UP) {
+				upRepeat = false;				
+			}
+			if(keycode == Keys.DOWN) {
+				downRepeat = false;				
+			}
+			
+			return false;
+		}
+
+		@Override
+		public boolean keyTyped(char character) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public boolean touchDragged(int screenX, int screenY, int pointer) {
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public boolean mouseMoved(int screenX, int screenY) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean scrolled(int amount) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+		
+		
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+}

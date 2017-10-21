@@ -1,0 +1,36 @@
+package gr.joints.myscreens;
+
+import gr.joints.managers.MyScreenManager;
+
+public class RopeScreen extends GraniteScreen{
+
+	public RopeScreen(MyScreenManager msm) {
+		super(msm);
+		
+	}
+
+	@Override
+	public void update(float dt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void render() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resize(int width, int Height) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}// END

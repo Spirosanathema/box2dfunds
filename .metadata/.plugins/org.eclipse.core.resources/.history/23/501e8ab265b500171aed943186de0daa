@@ -1,0 +1,5 @@
+package gr.joints.managers;
+
+public class MyBox2DManager {
+
+}

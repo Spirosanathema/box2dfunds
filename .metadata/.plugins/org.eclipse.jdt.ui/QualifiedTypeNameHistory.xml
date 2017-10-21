@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="com.badlogic.gdx.math.Rectangle"/>
+<fullyQualifiedTypeName name="java.util.concurrent.ThreadLocalRandom"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.utils.viewport.FillViewport"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.Input.Buttons"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.graphics.g2d.TextureAtlas"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.graphics.g2d.Animation"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.graphics.g2d.TextureRegion"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.utils.viewport.FitViewport"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.utils.viewport.StretchViewport"/>
+<fullyQualifiedTypeName name="listeners.MyKeyListener"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.InputProcessor"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.math.MathUtils"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.Input"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.utils.Array"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.joints.RevoluteJoint"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.joints.RopeJoint"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.joints.RopeJointDef"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.joints.MouseJointDef"/>
+<fullyQualifiedTypeName name="gr.joints.MyGame"/>
+<fullyQualifiedTypeName name="java.util.Stack"/>
+<fullyQualifiedTypeName name="gr.joints.myscreens.GraniteScreen"/>
+<fullyQualifiedTypeName name="gr.joints.managers.MyScreenManager"/>
+<fullyQualifiedTypeName name="gr.joints.myscreens.RopeScreen"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.Box2DDebugRenderer"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.graphics.OrthographicCamera"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.Gdx"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.Input.Keys"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.graphics.Cursor.SystemCursor"/>
+<fullyQualifiedTypeName name="gr.joints.MyConstants.MyConsts"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.BodyDef.BodyType"/>
+<fullyQualifiedTypeName name="gr.joints.myscreens.ScreenMenu"/>
+<fullyQualifiedTypeName name="gr.joints.managers.MyBox2DManager"/>
+</qualifiedTypeNameHistroy>

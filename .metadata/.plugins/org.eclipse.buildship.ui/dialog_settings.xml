@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.buildship.ui.wizard.project.import">
+		<item value="WRAPPER" key="gradle_distribution_type"/>
+		<item value="" key="gradle_distribution_configuration"/>
+		<item value="C:\Users\Bionic\git\dokimi" key="project_location"/>
+	</section>
+	<section name="org.eclipse.buildship.ui.wizard.project.creation">
+		<item value="false" key="use_default_location"/>
+		<item value="C:\Users\Bionic\git\LibSpace-1" key="custom_location"/>
+		<item value="C:\Users\Bionic\git\LibSpace-1\libsp1" key="project_location"/>
+	</section>
+</section>

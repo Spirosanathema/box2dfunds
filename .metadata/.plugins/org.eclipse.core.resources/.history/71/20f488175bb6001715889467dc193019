@@ -1,0 +1,124 @@
+package gr.joints.myscreens;
+
+import static gr.joints.MyConstants.MyConsts.STEP;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
+
+import gr.joints.managers.MyBox2DManager;
+import gr.joints.managers.MyScreenManager;
+import static gr.joints.MyConstants.MyConsts.PPM;
+
+public class ScreenMenu extends GraniteScreen{
+	private Texture tex, dynoTex;
+	private Sprite sprite, dynoSprite;
+	private OrthographicCamera b2dcam;
+	private World world;
+	private Box2DDebugRenderer renderer;
+	private SpriteBatch sb;
+	private  Body ground, dyno, player;
+	
+	private float spriteWidth, spriteHeight, dynoSpriteWidth, dynoSpriteHeight;
+	
+	private static float horizontalMovement;
+	private static float verticalMovement;
+	
+	
+	public ScreenMenu(MyScreenManager msm) {
+		super(msm);
+		sb = getSb();
+		tex = new Texture(Gdx.files.internal("gun.jpeg"));
+		dynoTex = new Texture(Gdx.files.internal("dyno.png"));
+		sprite = new Sprite(tex);
+		dynoSprite = new Sprite(dynoTex);
+		spriteWidth = Gdx.graphics.getWidth() /PPM;
+		spriteHeight = Gdx.graphics.getHeight() /PPM;
+		dynoSpriteWidth = 100f /PPM;
+		dynoSpriteHeight = 100f /PPM;
+		
+		horizontalMovement = 0;
+		verticalMovement = 0;		
+		
+		sprite.setSize(spriteWidth, spriteHeight);
+		dynoSprite.setSize(dynoSpriteWidth, dynoSpriteHeight);
+		world = getWorld();
+		renderer = gerBox2DDebugRenderer();
+		b2dcam = getb2dCam();
+		b2dcam.setToOrtho(false, Gdx.graphics.getWidth() /PPM, Gdx.graphics.getHeight() /PPM);
+		
+		// Bodies Creation
+		ground = MyBox2DManager.createPolygonBody(true, Gdx.graphics.getWidth(), 15f, Gdx.graphics.getWidth() + 10f, 15 + 10f, world, renderer);
+		dyno = MyBox2DManager.createCircleBody(false, dynoSprite.getWidth(), dynoSprite.getHeight(), 100f, world, renderer);
+		//player = MyBox2DManager.createPolygonBody(false, 700, 400, 100, 100, world, renderer);
+		player = MyBox2DManager.createCircleBody(false, 400, 400, 130, world, renderer);
+		player.getFixtureList().get(0).setFriction(0f);
+		ground.getFixtureList().get(0).setFriction(0f);
+		//player.getFixtureList().get(0).setRestitution(.6f);
+	}
+
+	@Override
+	public void update(float dt) {
+		world.step(STEP, 6, 2);
+		dynoMovementHandler(dt);
+		b2dcam.update();
+	}
+
+	@Override
+	public void render() {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
+		renderer.render(world, b2dcam.combined);
+		
+		sb.begin();
+		//sb.draw(sprite, 0, 0, spriteWidth * PPM, spriteHeight * PPM);
+		sb.draw(dynoSprite, dyno.getPosition().x *PPM - dynoSprite.getWidth() *PPM /2, dyno.getPosition().y *PPM - dynoSprite.getHeight() *PPM /2,
+				dynoSpriteWidth * PPM , dynoSpriteHeight * PPM);
+		sb.end();
+		
+		//renderer.render(world, b2dcam.combined);
+	}
+
+	@Override
+	public void dispose() {
+		tex.dispose();
+		dynoTex.dispose();
+		world.destroyBody(ground);
+		world.destroyBody(dyno);
+		world.destroyBody(player);
+	}
+	
+	public void resize(int width, int height) {
+		//b2dcam.setToOrtho(false, width /PPM, height /PPM);
+	}
+	
+	private void dynoMovementHandler(float delta) {
+		//player.setLinearVelocity(0, -12f);
+		player.applyForceToCenter(0, -12f, false);
+		player.applyAngularImpulse(25, true);
+		
+		dyno.setLinearVelocity(2.5f * horizontalMovement, dyno.getLinearVelocity().y);
+		dyno.applyForceToCenter(dyno.getLinearVelocity().x, 200f * verticalMovement, true);
+		
+		horizontalMovement = 0;
+		verticalMovement = 0;
+	}
+	
+//	public String toString() {
+//		return "ScreenMenus";
+//	}
+	
+	//-------------------------------------  Getters - Setters -------------------------------------------------------
+	public static void setDynoHorizontalMove(float horMove) { horizontalMovement = horMove; }
+	public static void setDynoVerticalMove(float vertMove) { verticalMovement = vertMove; }
+		
+
+}// END

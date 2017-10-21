@@ -1,0 +1,7 @@
+#
+#Sat Sep 30 21:45:44 EEST 2017
+linkedResources=
+classpath=<?xml version\="1.0" encoding\="UTF-8"?>\n<classpath>\n</classpath>\n
+subprojectPaths=android;core;desktop
+derivedResources=.gradle;build;android/build;core/build;desktop/build
+buildDir=build

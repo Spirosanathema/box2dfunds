@@ -1,0 +1,7 @@
+package gr.joints.MyConstants;
+
+public abstract class MyConsts {
+	
+	public final float PPM = 1/45f;
+
+}

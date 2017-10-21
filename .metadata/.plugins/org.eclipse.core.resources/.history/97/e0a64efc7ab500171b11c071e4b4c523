@@ -1,0 +1,49 @@
+package gr.joints.managers;
+
+import static gr.joints.MyConstants.MyConsts.PPM;
+
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
+
+import gr.joints.myscreens.GraniteScreen;
+
+public class MyBox2DManager {
+	private World world;
+	private Box2DDebugRenderer renderer;
+	
+	private static Body body;
+	private static Fixture fixture;
+	
+//	public MyBox2DManager(GraniteScreen gs) {
+//		//world = gs.getWorld();
+//		//renderer = gs.gerBox2DDebugRenderer();
+//	}
+	
+	public static Body createPolygonBody(boolean isStatic, float positionX, float positionY, float dimensionX, float dimensionY,
+			World world, Box2DDebugRenderer renderer) {
+		BodyDef bdef = new BodyDef();
+		if(isStatic)
+			bdef.type = BodyDef.BodyType.StaticBody;
+		else
+			bdef.type = BodyDef.BodyType.DynamicBody;
+		bdef.position.set(positionX /PPM, positionY /PPM);
+		body = world.createBody(bdef);
+		
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(dimensionX /2/PPM, dimensionY /2/PPM);
+		
+		FixtureDef fdef = new FixtureDef();
+		fdef.density = .5f;
+		fdef.shape = shape;
+		fixture = body.createFixture(fdef);
+		
+		
+		return body;
+	}	
+
+}// END
